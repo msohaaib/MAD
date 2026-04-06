@@ -1,23 +1,34 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import HomeScreen from '../Screens/HomeScreen';
+import Login from '../Screens/LoginScreen';
+import Signup from '../Screens/SignupScreen';
+import GuestHome from '../Screens/GuestHomeScreen';
+import AdminDashboard from '../Screens/AdminDashboard';
+
 import MenuScreen from '../Screens/MenuScreen';
-import BookingScreen from '../Screens/BookingScreen';
+import TableScreen from '../Screens/TableScreen';
+import ReservationScreen from '../Screens/ReservationScreen';
+import OrderScreen from '../Screens/OrderScreen';
 
 const Stack = createNativeStackNavigator();
 
-const AppNavigator = () => {
+export default function AppNavigator() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Menu" component={MenuScreen} />
-        <Stack.Screen name="Booking" component={BookingScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
-};
+    <Stack.Navigator>
+      {/* Auth */}
+      <Stack.Screen name="Login" component={Login} />
+      <Stack.Screen name="Signup" component={Signup} />
 
-export default AppNavigator;
+      {/* Main */}
+      <Stack.Screen name="Guest" component={GuestHome} />
+      <Stack.Screen name="Admin" component={AdminDashboard} />
+
+      {/* Features (IMPORTANT FIX) */}
+      <Stack.Screen name="Menu" component={MenuScreen} />
+      <Stack.Screen name="Tables" component={TableScreen} />
+      <Stack.Screen name="Reservations" component={ReservationScreen} />
+      <Stack.Screen name="Orders" component={OrderScreen} />
+    </Stack.Navigator>
+  );
+}
