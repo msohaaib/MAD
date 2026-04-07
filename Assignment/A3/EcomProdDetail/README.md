@@ -1,97 +1,102 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# E-Commerce Product Details App
 
-# Getting Started
+A React Native application that displays product details fetched from a local MySQL database and allows users to add products to a cart using AsyncStorage.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+---
 
-## Step 1: Start Metro
+## Features
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+- Fetch product details from a MySQL backend API
+- Display product image, title, price, and description
+- Add products to a local cart using AsyncStorage
+- Works on Android emulators and real devices
+- Offline cart persistence
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+---
 
-```sh
-# Using npm
-npm start
+## Project Structure
 
-# OR using Yarn
-yarn start
+#
+
+```
+EcomProdDetail/
+├─ android/
+├─ ios/
+├─ src/
+│ ├─ screens/
+│  └─ ProductDetails.js
+├─ Backend/
+|    └─ server.js
+├─ App.js
+├─ setup.sql
+├─ package.json
+└─ README.md
 ```
 
-## Step 2: Build and run your app
+---
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+## Requirements
 
-### Android
+- Node.js >= 18.x
+- React Native CLI
+- Android Studio (for emulator)
+- MySQL Server
+- npm or yarn
 
-```sh
-# Using npm
-npm run android
+---
 
-# OR using Yarn
-yarn android
-```
+## Installation
 
-### iOS
+1.  Clone the repository:
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+`git clone https://github.com/msohaaib/MAD.git`
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+`cd /Assignments/A3/EcomProdDetail`
 
-```sh
-bundle install
-```
+2.  Install dependencies:
 
-Then, and every time you update your native dependencies, run:
+`npm install --legacy-peer-deps`
 
-```sh
-bundle exec pod install
-```
+3.  Install AsyncStorage (compatible version):
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+`npm install @react-native-async-storage/async-storage@1.15.14 --legacy-peer-deps`
 
-```sh
-# Using npm
-npm run ios
+---
 
-# OR using Yarn
-yarn ios
-```
+## Backend Setup
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+1.  Setup MySQL database:
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+Run inside EcomProdDetail folder
 
-## Step 3: Modify your app
+`mysql -u root < setup.sql`
 
-Now that you have successfully run the app, let's make changes!
+2.  Run backend:
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+`node server.js`
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+> Make sure your device/emulator is on the same network as your backend.
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+---
 
-## Congratulations! :tada:
+## Run the App
 
-You've successfully run and modified your React Native App. :partying_face:
+1.  Start Metro bundler:
 
-### Now what?
+`npx react-native start`
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+2.  Run on Android:
 
-# Troubleshooting
+`npx react-native run-android`
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+---
 
-# Learn More
+## How It Works
 
-To learn more about React Native, take a look at the following resources:
+#
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+1.  Open product details screen
+2.  App fetches product from backend
+3.  Display product info (image, title, price, description)
+4.  Tap **Add to Cart** → save in AsyncStorage
+5.  Cart persists even after app restart

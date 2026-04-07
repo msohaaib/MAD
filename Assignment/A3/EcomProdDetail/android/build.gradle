@@ -5,16 +5,17 @@ buildscript {
         compileSdkVersion = 36
         targetSdkVersion = 36
         ndkVersion = "27.1.12297006"
-        kotlinVersion = "2.1.20"
+        kotlinVersion = "1.8.21" // Use stable Kotlin version
     }
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://www.jitpack.io' } // Needed for AsyncStorage
     }
     dependencies {
-        classpath("com.android.tools.build:gradle")
+        classpath("com.android.tools.build:gradle:8.1.0") // Add proper version
         classpath("com.facebook.react:react-native-gradle-plugin")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
     }
 }
 
