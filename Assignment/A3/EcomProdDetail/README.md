@@ -1,6 +1,6 @@
 # E-Commerce Product Details App
 
-A React Native application that displays product details fetched from a local MySQL database and allows users to add products to a cart using AsyncStorage.
+A React Native application that displays product list fetched from a local MySQL database.
 
 ---
 
@@ -8,9 +8,7 @@ A React Native application that displays product details fetched from a local My
 
 - Fetch product details from a MySQL backend API
 - Display product image, title, price, and description
-- Add products to a local cart using AsyncStorage
 - Works on Android emulators and real devices
-- Offline cart persistence
 
 ---
 
@@ -98,5 +96,3 @@ Run inside EcomProdDetail folder
 1.  Open product details screen
 2.  App fetches product from backend
 3.  Display product info (image, title, price, description)
-4.  Tap **Add to Cart** → save in AsyncStorage
-5.  Cart persists even after app restart
