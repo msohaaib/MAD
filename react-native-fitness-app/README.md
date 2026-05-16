@@ -27,10 +27,19 @@ A **cross-platform fitness tracking app** built with **React Native**, designed 
 
 ## Screenshots
 
+Stats
 ![Dashboard Screen](readme-images/Stats.png)
+
+Home Scree
 ![Home Screen](readme-images/Home.png)
+
+Fitness Screen
 ![Fitness Screen](readme-images/FitScreen.png)
+
+Workout Screen
 ![Workout Screen](readme-images/Workout.png)
+
+Rest Screen
 ![Rest Screen](readme-images/rest.png)
 
 ---
