@@ -1,49 +1,86 @@
-<div align="center">
-  
-  ![GitHub repo size](https://img.shields.io/github/repo-size/geeky-prashant/react-native-fitness-app)
-  ![GitHub stars](https://img.shields.io/github/stars/geeky-prashant/react-native-fitness-app?style=social)
-  ![GitHub forks](https://img.shields.io/github/forks/geeky-prashant/react-native-fitness-app?style=social)
- 
-  <br />
+# React Native Fitness App
 
-  <h2 align="center">React Native Fitness App</h2>
+A **cross-platform fitness tracking app** built with **React Native**, designed to help users stay motivated and track their fitness journey. The app offers workout plans, rest tracking, and a visually engaging dashboard.
 
-  In this project, I have created a Fitness App, The project is built using Expo, React Native, and React Native Navigation.
+---
 
-</div>
+## Table of Contents
 
-### Demo Screenshot
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [Folder Structure](#folder-structure)
+- [Installation](#installation)
+- [Running the App](#running-the-app)
 
-![React Native Fitness App Demo](./readme-images/React-Native-Fitness-App.png "Desktop Demo")
+---
 
-## Get Started
+## Features
 
-install dev dependencies
+- **Workout Tracking** – Track exercises, sets, and reps.
+- **Predefined Plans** – Offers workout plans tailored for different fitness levels.
+- **Rest Management** – Includes rest timers to manage breaks between exercises.
+- **Motivational Dashboard** – A central hub to monitor progress and fitness stats.
+- **Cross-platform Support** – Runs on both Android and iOS.
+- **Reusable Components** – Includes modular UI components for scalability.
 
-### `npm install`
+---
 
-## Then
+## Screenshots
 
-Run The App
+![Dashboard Screen](readme-images/Stats.png)
+![Home Screen](readme-images/Home.png)
+![Fitness Screen](readme-images/FitScreen.png)
+![Workout Screen](readme-images/Workout.png)
+![Rest Screen](readme-images/rest.png)
 
-### `npm start`
+---
 
-Runs your app in development mode.
+## Folder Structure
 
-Open it in the [Expo app](https://expo.io) on your phone to view it. It will reload if you save edits to your files, and you will see build errors and logs in the terminal.
+```
+react-native-fitness-app/
+├── .expo/ # Expo-specific configuration
+├── assets/ # Images, fonts, icons
+├── components/ # Reusable UI components
+│ └── FitnessCards.js
+├── data/ # Data files for app
+│ └── fitness.js
+├── screens/ # App screens
+│ ├── FitScreen.js
+│ ├── HomeScreen.js
+│ ├── RestScreen.js
+│ └── WorkoutScreen.js
+├── App.js # Main app entry point
+├── app.json # App configuration
+├── babel.config.js # Babel configuration
+├── Context.js # Context API for state management
+├── StackNavigator.js # Navigation setup
+├── package.json # Dependencies and scripts
+├── package-lock.json
+├── yarn.lock
+└── readme-images/ # Images for README or documentation
+```
 
-#### `npm run ios`
+---
 
-Like `npm start` / `yarn start`, but also attempts to open your app in the iOS Simulator if you're on a Mac and have it installed.
+## Installation
 
-#### `npm run android`
+1. **Clone the repository**
 
-Like `npm start` / `yarn start`, but also attempts to open your app on a connected Android device or emulator. Requires an installation of Android build tools (see [React Native docs](https://facebook.github.io/react-native/docs/getting-started.html) for detailed setup).
+```bash
+git clone https://github.com/msohaaib/MAD.git
+cd MAD/react-native-fitness-app
+```
 
-### Contact
+2. **Install Dependencies**
 
-If you want to contact me you can reach me at [LinkedIn](https://www.linkedin.com/in/geekyprashant/).
+```
+npm install
 
-### License
+```
 
-This project is **free to use** and does not contain any license.
+## Running the App
+
+```
+npm start
+```
