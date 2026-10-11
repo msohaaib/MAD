@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="420" viewBox="0 0 920 420">
+  <rect width="920" height="420" fill="#F4EFE6"/>
+  <text x="460" y="36" text-anchor="middle" font-family="Georgia, serif" font-size="22" fill="#2A1C16">Deployment diagram</text>
+
+  <rect x="40" y="90" width="240" height="230" rx="16" fill="#FFFCF6" stroke="#7A2E24" stroke-width="2"/>
+  <text x="160" y="122" text-anchor="middle" font-family="Helvetica" font-size="16" font-weight="700" fill="#7A2E24">Phone</text>
+  <rect x="70" y="145" width="180" height="130" rx="10" fill="#F4EFE6" stroke="#C4A46A"/>
+  <text x="160" y="190" text-anchor="middle" font-family="Helvetica" font-size="14" fill="#2A1C16">Expo Go</text>
+  <text x="160" y="214" text-anchor="middle" font-family="Helvetica" font-size="14" fill="#2A1C16">Bistro Nova app</text>
+  <text x="160" y="248" text-anchor="middle" font-family="Helvetica" font-size="12" fill="#7A6A5E">fetch + JWT</text>
+
+  <rect x="340" y="90" width="240" height="230" rx="16" fill="#FFFCF6" stroke="#7A2E24" stroke-width="2"/>
+  <text x="460" y="122" text-anchor="middle" font-family="Helvetica" font-size="16" font-weight="700" fill="#7A2E24">Laptop</text>
+  <rect x="370" y="145" width="180" height="130" rx="10" fill="#F4EFE6" stroke="#C4A46A"/>
+  <text x="460" y="190" text-anchor="middle" font-family="Helvetica" font-size="14" fill="#2A1C16">Node.js / Express</text>
+  <text x="460" y="214" text-anchor="middle" font-family="Helvetica" font-size="14" fill="#2A1C16">:5000 on 0.0.0.0</text>
+  <text x="460" y="248" text-anchor="middle" font-family="Helvetica" font-size="12" fill="#7A6A5E">same Wi-Fi as phone</text>
+
+  <rect x="640" y="90" width="240" height="230" rx="16" fill="#FFFCF6" stroke="#7A2E24" stroke-width="2"/>
+  <text x="760" y="122" text-anchor="middle" font-family="Helvetica" font-size="16" font-weight="700" fill="#7A2E24">Database</text>
+  <rect x="670" y="145" width="180" height="130" rx="10" fill="#F4EFE6" stroke="#C4A46A"/>
+  <text x="760" y="190" text-anchor="middle" font-family="Helvetica" font-size="14" fill="#2A1C16">MongoDB</text>
+  <text x="760" y="214" text-anchor="middle" font-family="Helvetica" font-size="14" fill="#2A1C16">restaurant_app</text>
+  <text x="760" y="248" text-anchor="middle" font-family="Helvetica" font-size="12" fill="#7A6A5E">Atlas or local</text>
+
+  <line x1="280" y1="205" x2="340" y2="205" stroke="#2A1C16" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="310" y="196" text-anchor="middle" font-family="Helvetica" font-size="12" fill="#2A1C16">HTTP JSON</text>
+  <line x1="580" y1="205" x2="640" y2="205" stroke="#2A1C16" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="610" y="196" text-anchor="middle" font-family="Helvetica" font-size="12" fill="#2A1C16">Mongoose</text>
+
+  <text x="460" y="370" text-anchor="middle" font-family="Helvetica" font-size="13" fill="#7A6A5E">Physical phone uses http://LAPTOP_IP:5000  ·  Android emulator uses http://10.0.2.2:5000</text>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-max">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2A1C16"/>
+    </marker>
+  </defs>
+</svg>

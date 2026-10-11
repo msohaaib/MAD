@@ -1,0 +1,344 @@
+{
+  "info": {
+    "name": "restaurant-api",
+    "description": "Bistro Nova A2 API. Set baseUrl to http://localhost:5000. Login requests save the token automatically.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000" },
+    { "key": "token", "value": "" },
+    { "key": "menuId", "value": "" },
+    { "key": "orderId", "value": "" },
+    { "key": "reservationId", "value": "" },
+    { "key": "tableId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health"
+          }
+        },
+        {
+          "name": "Unknown route (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/does-not-exist"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sam Guest\",\n  \"email\": \"sam@bistronova.com\",\n  \"password\": \"Guest123\",\n  \"phone\": \"0412000333\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/register"
+          }
+        },
+        {
+          "name": "Login customer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.token) pm.collectionVariables.set('token', data.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@bistronova.com\",\n  \"password\": \"Customer123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Login manager",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.token) pm.collectionVariables.set('token', data.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"manager@bistronova.com\",\n  \"password\": \"Manager123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/auth/me"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Menu",
+      "item": [
+        {
+          "name": "List menu",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/menu" }
+        },
+        {
+          "name": "List menu by category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/menu?category=Mains"
+          }
+        },
+        {
+          "name": "Search menu",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/menu?search=salmon"
+          }
+        },
+        {
+          "name": "Get one item",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/menu/{{menuId}}"
+          }
+        },
+        {
+          "name": "Create item (manager)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data._id) pm.collectionVariables.set('menuId', data._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Season special\",\n  \"description\": \"Chef's plate of the week.\",\n  \"price\": 29,\n  \"category\": \"Mains\",\n  \"available\": true,\n  \"image\": \"✨\"\n}"
+            },
+            "url": "{{baseUrl}}/api/menu"
+          }
+        },
+        {
+          "name": "Update item (manager)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Season special\",\n  \"description\": \"Updated plate.\",\n  \"price\": 31,\n  \"category\": \"Mains\",\n  \"available\": true,\n  \"image\": \"✨\"\n}"
+            },
+            "url": "{{baseUrl}}/api/menu/{{menuId}}"
+          }
+        },
+        {
+          "name": "Delete item (manager)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/menu/{{menuId}}"
+          }
+        },
+        {
+          "name": "FAIL missing name (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 12,\n  \"category\": \"Mains\"\n}"
+            },
+            "url": "{{baseUrl}}/api/menu"
+          }
+        },
+        {
+          "name": "FAIL negative price (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Broken soup\",\n  \"price\": -4,\n  \"category\": \"Starters\"\n}"
+            },
+            "url": "{{baseUrl}}/api/menu"
+          }
+        },
+        {
+          "name": "FAIL wrong id (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/menu/not-a-valid-id"
+          }
+        },
+        {
+          "name": "FAIL no token (401)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Secret dish\",\n  \"price\": 20,\n  \"category\": \"Mains\"\n}"
+            },
+            "url": "{{baseUrl}}/api/menu"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Place order",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [{ \"menuItem\": \"{{menuId}}\", \"quantity\": 1 }],\n  \"notes\": \"No onion\"\n}"
+            },
+            "url": "{{baseUrl}}/api/orders"
+          }
+        },
+        {
+          "name": "My orders",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/orders/my"
+          }
+        },
+        {
+          "name": "All orders (manager)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/orders"
+          }
+        },
+        {
+          "name": "Update order status (manager)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{ \"status\": \"Preparing\" }" },
+            "url": "{{baseUrl}}/api/orders/{{orderId}}/status"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reservations",
+      "item": [
+        {
+          "name": "List tables",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/tables" }
+        },
+        {
+          "name": "Create reservation",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"table\": \"{{tableId}}\",\n  \"date\": \"2026-12-24\",\n  \"time\": \"19:30\",\n  \"partySize\": 2,\n  \"notes\": \"Window if possible\"\n}"
+            },
+            "url": "{{baseUrl}}/api/reservations"
+          }
+        },
+        {
+          "name": "My reservations",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/reservations/my"
+          }
+        },
+        {
+          "name": "All reservations (manager)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/reservations"
+          }
+        },
+        {
+          "name": "Accept reservation (manager)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{ \"status\": \"Accepted\" }" },
+            "url": "{{baseUrl}}/api/reservations/{{reservationId}}"
+          }
+        }
+      ]
+    }
+  ]
+}

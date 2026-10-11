@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bistro Nova — Software Requirements Specification v2</title>
+  <style>
+    @page { size: A4; margin: 22mm 18mm; }
+    body { font-family: "Iowan Old Style", Georgia, serif; color: #2A1C16; line-height: 1.45; }
+    h1, h2, h3 { font-weight: 700; page-break-after: avoid; }
+    h1 { font-size: 28px; margin-bottom: 6px; }
+    h2 { font-size: 20px; margin-top: 28px; border-bottom: 1px solid #C4A46A; padding-bottom: 4px; }
+    h3 { font-size: 16px; margin-top: 18px; }
+    .cover { text-align: center; padding: 80px 20px 40px; }
+    .eyebrow { letter-spacing: 3px; text-transform: uppercase; color: #7A2E24; font-size: 13px; }
+    .muted { color: #7A6A5E; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 12px 0 18px; page-break-inside: auto; }
+    th, td { border: 1px solid #C9B79A; padding: 7px 8px; vertical-align: top; }
+    th { background: #7A2E24; color: #fff; text-align: left; }
+    tr { page-break-inside: avoid; }
+    ul { margin-top: 6px; }
+    .box { background: #F4EFE6; border: 1px solid #E6D8C4; padding: 12px 14px; margin: 12px 0; }
+    img { max-width: 100%; height: auto; border: 1px solid #E6D8C4; }
+    .caption { font-size: 12px; color: #7A6A5E; text-align: center; margin-top: 6px; }
+    code { font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <section class="cover">
+    <div class="eyebrow">Assignment A2 · Restaurant App MVP</div>
+    <h1>Software Requirements Specification</h1>
+    <p class="muted">Bistro Nova · Version 2.0 · Revised from A1</p>
+    <p>This document updates the A1 SRS. The mobile screens, context, reducers, and hooks stay. A Node.js / Express server and a MongoDB database are now in scope so every phone reads and writes the same data.</p>
+  </section>
+
+  <h2>1. Introduction</h2>
+  <h3>1.1 Purpose</h3>
+  <p>This SRS describes Bistro Nova, a restaurant mobile application for customers and a floor manager. Version 2 adds a shared backend so menu prices, availability, orders, and reservations are no longer trapped on a single device.</p>
+
+  <h3>1.2 Scope</h3>
+  <p><strong>In scope.</strong> Role-based login, menu browsing, cart and order placement, order tracking, table reservations, and a manager dashboard for menu, orders, and bookings. The Express API and the MongoDB database named <code>restaurant_app</code> are now in scope. The phone talks to the laptop (or a hosted server) over HTTP. The server is the only place that stores users, menu items, tables, reservations, and orders.</p>
+  <p><strong>Out of scope.</strong> Real card payments, push notifications, kitchen printer integration, multi-restaurant support, and delivery tracking remain out of scope.</p>
+  <div class="box">
+    <p><strong>Problems found while using the A1 app (mock data only), and how v2 solves them.</strong></p>
+    <ul>
+      <li><strong>A manager price change stays on one phone.</strong> A1 wrote menu edits to AsyncStorage. Another device still showed the old price. v2 stores prices in MongoDB. <code>PUT /api/menu/:id</code> updates the shared document. The customer list reloads with <code>GET /api/menu</code>.</li>
+      <li><strong>Sold-out dishes stay available on other phones.</strong> The manager could flip availability locally only. v2 writes <code>available</code> on the MenuItems collection so every customer sees the same flag.</li>
+      <li><strong>An order placed on one phone is missing on another.</strong> A1 kept orders in memory or device storage. v2 saves the order on the server. <code>GET /api/orders/my</code> returns the same list for that user on any device after login.</li>
+      <li><strong>Reinstalling the app wipes bookings and order history.</strong> Mock files and AsyncStorage die with the install. v2 keeps Reservations and Orders in MongoDB.</li>
+      <li><strong>Two guests can book the same table at the same time.</strong> Each phone checked only its own list. The server now rejects a clash with HTTP 409 before insert.</li>
+      <li><strong>The cart total can be forged.</strong> A1 trusted whatever number the reducer produced. The server ignores a client total and prices every line from MenuItems.</li>
+      <li><strong>Order status only moved on the phone that started a fake timer.</strong> v2 polls <code>GET /api/orders/my</code> every ten seconds. When the manager patches status, the customer screen updates without a restart.</li>
+      <li><strong>Passwords lived in a mock users file.</strong> v2 hashes passwords with bcrypt and issues a JWT. Menu writes require a manager token.</li>
+    </ul>
+  </div>
+
+  <h3>1.3 Definitions, acronyms, and abbreviations</h3>
+  <table>
+    <tr><th>Term</th><th>Definition</th></tr>
+    <tr><td>API</td><td>Application Programming Interface. The set of HTTP URLs the app calls on the server.</td></tr>
+    <tr><td>REST</td><td>Representational State Transfer. Resources such as menu items are read and changed with GET, POST, PUT, PATCH, and DELETE.</td></tr>
+    <tr><td>Endpoint</td><td>One method plus path, for example <code>POST /api/auth/login</code>.</td></tr>
+    <tr><td>JSON</td><td>JavaScript Object Notation. The request and response body format.</td></tr>
+    <tr><td>MongoDB</td><td>A document database. One database holds several collections of JSON-like documents.</td></tr>
+    <tr><td>Collection</td><td>A group of documents of the same kind, similar to a table. Example: MenuItems.</td></tr>
+    <tr><td>Mongoose</td><td>A Node.js library that defines schemas and talks to MongoDB.</td></tr>
+    <tr><td>Middleware</td><td>A function that runs before a route handler. Auth middleware checks the JWT.</td></tr>
+    <tr><td>JWT</td><td>JSON Web Token. A signed string that proves the user is logged in. It expires in one day.</td></tr>
+    <tr><td>HTTP Status Code</td><td>A number that describes the result: 200 OK, 201 Created, 400 bad data, 401 no token, 403 wrong role, 404 missing, 409 conflict, 500 server error.</td></tr>
+    <tr><td>Seed</td><td>A script that empties collections and inserts known starter data.</td></tr>
+    <tr><td>Polling</td><td>The app repeating the same GET request on a timer so it can see server-side status changes.</td></tr>
+  </table>
+
+  <h3>1.4 References</h3>
+  <ul>
+    <li>A1 Software Requirements Specification (this document is a revision, not a rewrite).</li>
+    <li>Assignment A2 brief: Express server, MongoDB, JWT, and connecting the Expo app.</li>
+    <li>Express, Mongoose, and MongoDB Atlas documentation.</li>
+  </ul>
+
+  <h3>1.5 Overview</h3>
+  <p>Section 2 describes the product. Section 3 lists functional requirements. Section 4 lists quality attributes. Section 5 is the database design that replaces the A1 mock data sets. Section 6 covers the screens. Section 7 covers use cases. Section 8 lists the API. Section 9 holds the updated diagrams.</p>
+
+  <h2>2. Overall description</h2>
+  <h3>2.1 Product perspective</h3>
+  <p>Bistro Nova is a single-restaurant system. The Expo app is a client. The Express process on the laptop (or a later host) is the server. MongoDB is the system of record. Phones do not share files with each other. They share the database through the API.</p>
+
+  <h3>2.2 Product functions</h3>
+  <ul>
+    <li>Register and log in. The server returns a token and a user object without a password.</li>
+    <li>Browse, search, and filter the menu. The list comes from the server.</li>
+    <li>Place an order. The server computes the total and rejects unavailable dishes.</li>
+    <li>Track an order by polling every ten seconds.</li>
+    <li>Request a table. The server checks seats and time clashes.</li>
+    <li>Manager: create, edit, and delete dishes; toggle availability; move order status forward; accept or decline bookings.</li>
+  </ul>
+
+  <h3>2.3 User classes</h3>
+  <table>
+    <tr><th>User</th><th>Access</th></tr>
+    <tr><td>Customer</td><td>Public menu, own orders, own reservations, signup and login.</td></tr>
+    <tr><td>Manager</td><td>Everything a customer can do on the API that is role-open, plus menu writes, all orders, all reservations, and status changes.</td></tr>
+    <tr><td>Guest (not logged in)</td><td>Health check and menu read only.</td></tr>
+  </table>
+
+  <h3>2.4 Constraints</h3>
+  <ul>
+    <li>The phone must use the laptop LAN IP, not <code>localhost</code>, when the app runs in Expo Go.</li>
+    <li>JWT expires after 24 hours.</li>
+    <li>Order status may only move forward, except Cancelled from Pending.</li>
+    <li>No payment gateway is called.</li>
+  </ul>
+
+  <h3>2.5 Assumptions</h3>
+  <p>The restaurant has one site. Table bookings are keyed by date and time string (not overlapping duration windows). Both devices sit on the same Wi-Fi during the two-device test.</p>
+
+  <h2>3. Functional requirements</h2>
+  <table>
+    <tr><th>ID</th><th>Requirement</th></tr>
+    <tr><td>FR-01</td><td>The system shall register a customer with a hashed password and reject a duplicate email with 409.</td></tr>
+    <tr><td>FR-02</td><td>The system shall log a user in and return a JWT plus name, email, and role. The password shall never appear in a response.</td></tr>
+    <tr><td>FR-03</td><td>The system shall restore a session from AsyncStorage on the phone after the app is closed.</td></tr>
+    <tr><td>FR-04</td><td>Anyone may read the menu. Search on name is case-insensitive. Category may be filtered.</td></tr>
+    <tr><td>FR-05</td><td>Only a manager with a valid token may create, update, or delete a menu item.</td></tr>
+    <tr><td>FR-06</td><td>The server shall reject a negative price and an invalid MongoDB id with 400, and a missing item with 404.</td></tr>
+    <tr><td>FR-07</td><td>When an order is placed, the server shall load each dish from the database, refuse unavailable items, and compute the total itself.</td></tr>
+    <tr><td>FR-08</td><td>A customer shall see only their orders. A manager shall see all orders.</td></tr>
+    <tr><td>FR-09</td><td>Order status shall follow Pending → Preparing → Ready → Served. Cancelled is allowed only from Pending.</td></tr>
+    <tr><td>FR-10</td><td>The tracking screen shall poll the customer's orders every 10 seconds and clear the interval on unmount.</td></tr>
+    <tr><td>FR-11</td><td>A reservation shall be refused if the table is missing, the party is larger than the seat count, or the table is already booked at that date and time (409).</td></tr>
+    <tr><td>FR-12</td><td>A manager shall accept or decline a reservation. The customer list shall show the new status after refresh or return to the screen.</td></tr>
+    <tr><td>FR-13</td><td>Unknown routes shall return 404 with the message "Route not found". Uncaught errors shall return JSON with status 500.</td></tr>
+  </table>
+
+  <h2>4. Non-functional requirements</h2>
+  <ul>
+    <li><strong>Security.</strong> Passwords hashed with bcrypt. Protected routes read <code>Authorization: Bearer &lt;token&gt;</code>.</li>
+    <li><strong>Availability.</strong> The API listens on <code>0.0.0.0</code> so a phone on the LAN can reach it.</li>
+    <li><strong>Usability.</strong> The app keeps A1 loading, error, retry, and pull-to-refresh behaviour. Client validation still runs for quick feedback; the server decision wins.</li>
+    <li><strong>Maintainability.</strong> Routes only map URLs. Controllers own database work. <code>BASE_URL</code> lives in one file.</li>
+  </ul>
+
+  <h2>5. Database design</h2>
+  <p>The A1 mock files become MongoDB collections in the <code>restaurant_app</code> database. Documents use ObjectId primary keys. Related collections store those ids rather than embedding whole user records on every order.</p>
+  <table>
+    <tr>
+      <th>Collection</th>
+      <th>Fields and types</th>
+      <th>Relationships and rules</th>
+    </tr>
+    <tr>
+      <td>Users</td>
+      <td>
+        name: String, required<br />
+        email: String, required, unique, lowercase<br />
+        password: String, required, hashed, never returned<br />
+        role: String enum customer | manager, default customer<br />
+        phone: String<br />
+        timestamps
+      </td>
+      <td>Referenced by Orders.user and Reservations.user. Email must be unique. Seed includes one customer and one manager.</td>
+    </tr>
+    <tr>
+      <td>MenuItems</td>
+      <td>
+        name: String, required<br />
+        description: String<br />
+        price: Number, required, min 0<br />
+        category: String enum Starters | Mains | Desserts | Drinks, required<br />
+        available: Boolean, default true<br />
+        image: String<br />
+        allergens: [String]
+      </td>
+      <td>Order line items store MenuItem id plus a snapshot of name and price. Unavailable items cannot be ordered. Seed has at least 15 dishes.</td>
+    </tr>
+    <tr>
+      <td>Tables</td>
+      <td>
+        number: Number, required, unique, min 1<br />
+        seats: Number, required, min 1<br />
+        location: String enum Indoor | Window | Patio
+      </td>
+      <td>Referenced by Reservations.table. Seed has six tables. Party size cannot exceed seats.</td>
+    </tr>
+    <tr>
+      <td>Reservations</td>
+      <td>
+        user: ObjectId → Users, required<br />
+        table: ObjectId → Tables, required<br />
+        date: String, required (YYYY-MM-DD)<br />
+        time: String, required (HH:MM)<br />
+        partySize: Number, required, min 1<br />
+        status: Pending | Accepted | Declined | Cancelled<br />
+        notes: String<br />
+        createdAt, updatedAt (timestamps)
+      </td>
+      <td>Each reservation belongs to one user and one table. A Pending or Accepted row on the same table, date, and time is a conflict (409).</td>
+    </tr>
+    <tr>
+      <td>Orders</td>
+      <td>
+        user: ObjectId → Users, required<br />
+        items: [{ menuItem: ObjectId → MenuItems, name, price, quantity min 1 }]<br />
+        total: Number, required, min 0, server-computed<br />
+        status: Pending | Preparing | Ready | Served | Cancelled<br />
+        notes: String<br />
+        createdAt, updatedAt (timestamps)
+      </td>
+      <td>Each order belongs to one user. Total is not taken from the app. Status only moves forward; Cancelled only from Pending.</td>
+    </tr>
+  </table>
+
+  <h2>6. User interface</h2>
+  <p>A1 screens remain. Auth stack: Login, Signup. Customer tabs: Menu, Cart, Orders, Book, Profile. Extra stacks: dish detail, order tracking, book a table. Manager tabs: Floor, Menu, Orders, Bookings, Profile, plus the add/edit dish form. The visual language is warm paper and wine red. Screens now load through <code>src/api/client.js</code> and <code>src/hooks/useApi.js</code> instead of mock files.</p>
+
+  <h2>7. Use cases</h2>
+  <p><strong>UC-01 Customer places an order.</strong> The customer adds dishes, opens the cart, and taps Place order. The app sends item ids and quantities. The server loads prices, rejects sold-out dishes, stores the order, and returns 201. The tracking screen starts polling.</p>
+  <p><strong>UC-02 Manager marks a dish unavailable.</strong> The manager toggles the switch. The app calls the protected PUT. Any customer who pulls to refresh sees Unavailable and cannot add the dish.</p>
+  <p><strong>UC-03 Customer books a table.</strong> The customer picks a table, date, time, and party size. Client validation runs first. The server checks seats and clashes, then inserts Pending.</p>
+  <p><strong>UC-04 Manager accepts a booking and advances an order.</strong> Accept uses PATCH on the reservation. Ready uses PATCH on the order. The second phone sees both without a reinstall.</p>
+
+  <h2>8. API endpoints</h2>
+  <table>
+    <tr>
+      <th>Method</th>
+      <th>Endpoint</th>
+      <th>Access</th>
+      <th>Request body</th>
+      <th>Response</th>
+    </tr>
+    <tr>
+      <td>POST</td>
+      <td>/api/auth/login</td>
+      <td>Public</td>
+      <td>email, password</td>
+      <td>token and user</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>/api/menu</td>
+      <td>Public</td>
+      <td>None</td>
+      <td>List of menu items</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>/api/health</td>
+      <td>Public</td>
+      <td>None</td>
+      <td>{ status, time }</td>
+    </tr>
+    <tr>
+      <td>POST</td>
+      <td>/api/auth/register</td>
+      <td>Public</td>
+      <td>name, email, password, phone</td>
+      <td>201 token and user</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>/api/auth/me</td>
+      <td>Logged in</td>
+      <td>None</td>
+      <td>Current user</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>/api/menu/:id</td>
+      <td>Public</td>
+      <td>None</td>
+      <td>One menu item, or 404</td>
+    </tr>
+    <tr>
+      <td>POST</td>
+      <td>/api/menu</td>
+      <td>Manager</td>
+      <td>name, price, category, description, available, image</td>
+      <td>201 created item</td>
+    </tr>
+    <tr>
+      <td>PUT</td>
+      <td>/api/menu/:id</td>
+      <td>Manager</td>
+      <td>Any item fields</td>
+      <td>Updated item</td>
+    </tr>
+    <tr>
+      <td>DELETE</td>
+      <td>/api/menu/:id</td>
+      <td>Manager</td>
+      <td>None</td>
+      <td>Delete confirmation</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>/api/tables</td>
+      <td>Public</td>
+      <td>None</td>
+      <td>List of tables</td>
+    </tr>
+    <tr>
+      <td>POST</td>
+      <td>/api/orders</td>
+      <td>Logged in</td>
+      <td>items[{ menuItem, quantity }], notes</td>
+      <td>201 order with server total</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>/api/orders/my</td>
+      <td>Logged in</td>
+      <td>None</td>
+      <td>Caller's orders</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>/api/orders</td>
+      <td>Manager</td>
+      <td>None</td>
+      <td>All orders</td>
+    </tr>
+    <tr>
+      <td>PATCH</td>
+      <td>/api/orders/:id/status</td>
+      <td>Manager</td>
+      <td>status</td>
+      <td>Updated order, or 400 if the move is illegal</td>
+    </tr>
+    <tr>
+      <td>POST</td>
+      <td>/api/reservations</td>
+      <td>Logged in</td>
+      <td>table, date, time, partySize, notes</td>
+      <td>201 reservation, or 409 if booked</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>/api/reservations/my</td>
+      <td>Logged in</td>
+      <td>None</td>
+      <td>Caller's reservations</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>/api/reservations</td>
+      <td>Manager</td>
+      <td>None</td>
+      <td>All reservations</td>
+    </tr>
+    <tr>
+      <td>PATCH</td>
+      <td>/api/reservations/:id</td>
+      <td>Manager</td>
+      <td>status (Accepted, Declined, Cancelled)</td>
+      <td>Updated reservation</td>
+    </tr>
+  </table>
+  <p>Query parameters on <code>GET /api/menu</code>: <code>category</code> (exact) and <code>search</code> (case-insensitive name match).</p>
+
+  <h2>9. Diagrams</h2>
+  <p>The A1 sequence for “Customer places an order” now has three lifelines: the App, the Express server, and MongoDB.</p>
+  <img src="diagrams/sequence-place-order.svg" alt="Sequence diagram for placing an order" />
+  <p class="caption">Figure 1. Place-order sequence across the app, Express, and MongoDB.</p>
+  <img src="diagrams/deployment.svg" alt="Deployment diagram" />
+  <p class="caption">Figure 2. Phone, laptop running Express, and the restaurant_app database.</p>
+</body>
+</html>
